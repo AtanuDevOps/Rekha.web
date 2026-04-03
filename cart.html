@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - REKHA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 40px;
+        }
+        .cart-table th, .cart-table td {
+            padding: 20px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-item-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .cart-summary {
+            margin-top: 40px;
+            text-align: right;
+            padding: 30px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .total-price {
+            font-size: 2rem;
+            color: var(--accent-color);
+            font-weight: 700;
+            margin: 15px 0;
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #ff4d4d;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .qty-btn {
+            background-color: #eee;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        @media (max-width: 600px) {
+            .cart-table th:nth-child(1), .cart-table td:nth-child(1) { display: none; }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">REKHA</a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="categories.html">Categories</a></li>
+                    <li><a href="products.html">All Products</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="cart.html" class="cart-icon">
+                        🛒 <span class="cart-count">0</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="section-title">Your Shopping Cart</h1>
+        
+        <div id="cart-content">
+            <!-- Dynamically loaded -->
+        </div>
+
+        <div id="cart-summary-container" class="cart-summary" style="display: none;">
+            <h3>Order Summary</h3>
+            <div class="total-price">Total: $<span id="cart-total">0.00</span></div>
+            <button class="btn" onclick="checkout()">Proceed to Checkout</button>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h3>REKHA</h3>
+                    <p>Authentic handmade art and craft store. We bring creativity to your doorstep.</p>
+                </div>
+                <div>
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="categories.html">Categories</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="admin/login.html">Admin Login</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Contact Us</h3>
+                    <p>Email: hello@rekha.web</p>
+                    <p>Phone: +1 234 567 890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 REKHA Art & Craft Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', renderCart);
+
+        function renderCart() {
+            const items = cart.get();
+            const container = document.getElementById('cart-content');
+            const summary = document.getElementById('cart-summary-container');
+            const totalEl = document.getElementById('cart-total');
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; margin: 60px 0;">
+                        <h2>Your cart is empty</h2>
+                        <p>Go find some beautiful art to add!</p>
+                        <a href="products.html" class="btn" style="margin-top: 20px;">Shop Now</a>
+                    </div>
+                `;
+                summary.style.display = 'none';
+                return;
+            }
+
+            summary.style.display = 'block';
+            let tableHtml = `
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            items.forEach(item => {
+                tableHtml += `
+                    <tr>
+                        <td><img src="${item.image_url || 'https://via.placeholder.com/80x80?text=Product'}" class="cart-item-img"></td>
+                        <td>${item.name}</td>
+                        <td>$${item.price}</td>
+                        <td>
+                            <div class="qty-control">
+                                <button class="qty-btn" onclick="updateQty(${item.id}, ${item.quantity - 1})">-</button>
+                                <span>${item.quantity}</span>
+                                <button class="qty-btn" onclick="updateQty(${item.id}, ${item.quantity + 1})">+</button>
+                            </div>
+                        </td>
+                        <td>$${(item.price * item.quantity).toFixed(2)}</td>
+                        <td><button class="remove-btn" onclick="removeItem(${item.id})">Remove</button></td>
+                    </tr>
+                `;
+            });
+
+            tableHtml += `</tbody></table>`;
+            container.innerHTML = tableHtml;
+            totalEl.textContent = cart.total().toFixed(2);
+        }
+
+        function updateQty(id, qty) {
+            cart.updateQuantity(id, qty);
+            renderCart();
+        }
+
+        function removeItem(id) {
+            cart.remove(id);
+            renderCart();
+        }
+
+        function checkout() {
+            alert("Thank you for your order! Checkout functionality is part of Phase 2.");
+            cart.clear();
+            renderCart();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories - REKHA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">REKHA</a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="categories.html">Categories</a></li>
+                    <li><a href="products.html">All Products</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="cart.html" class="cart-icon">
+                        🛒 <span class="cart-count">0</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="section-title">Explore by Category</h1>
+        <div id="categories-grid" class="card-grid">
+            <!-- Dynamically loaded -->
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h3>REKHA</h3>
+                    <p>Authentic handmade art and craft store. We bring creativity to your doorstep.</p>
+                </div>
+                <div>
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="categories.html">Categories</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="admin/login.html">Admin Login</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Contact Us</h3>
+                    <p>Email: hello@rekha.web</p>
+                    <p>Phone: +1 234 567 890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 REKHA Art & Craft Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const { data: categories, error } = await supabaseClient
+                    .from('categories')
+                    .select('*');
+                
+                if (categories && categories.length > 0) {
+                    const container = document.getElementById('categories-grid');
+                    container.innerHTML = categories.map(cat => renderCard(cat, 'category')).join('');
+                } else {
+                    const demoCats = [
+                        { id: 1, name: "Handmade Pottery", description: "Beautiful ceramic pieces", image: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&q=80&w=400" },
+                        { id: 2, name: "Macrame Art", description: "Hand-woven wall hangings", image: "https://images.unsplash.com/photo-1528484461744-8da0038ed351?auto=format&fit=crop&q=80&w=400" },
+                        { id: 3, name: "Watercolour Paintings", description: "Original art pieces", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=400" },
+                        { id: 4, name: "Jewelry Design", description: "Unique handmade jewelry", image: "https://images.unsplash.com/photo-1535633302703-b0703af46f35?auto=format&fit=crop&q=80&w=400" }
+                    ];
+                    const container = document.getElementById('categories-grid');
+                    container.innerHTML = demoCats.map(cat => renderCard(cat, 'category')).join('');
+                }
+            } catch (e) {
+                console.error("Error fetching categories:", e);
+            }
+        });
+    </script>
+</body>
+</html>

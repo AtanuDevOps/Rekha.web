@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product - REKHA Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .admin-nav {
+            background-color: var(--white);
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+        }
+        .admin-nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="admin-nav">
+        <div class="container">
+            <h2 class="logo">REKHA Admin</h2>
+            <div class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="manage-products.html">Manage Products</a>
+                <a href="manage-categories.html">Manage Categories</a>
+                <a href="#" onclick="auth.logout()">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+        <div class="form-container">
+            <h1>Add New Product</h1>
+            <form id="product-form" style="margin-top: 30px;">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="p-name" required placeholder="e.g. Hand-painted Vase">
+                </div>
+                <div class="form-group">
+                    <label>Price ($)</label>
+                    <input type="number" step="0.01" id="p-price" required placeholder="29.99">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="p-category" required>
+                        <option value="">Select Category</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="p-description" rows="4" placeholder="Tell us about this unique piece..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <input type="file" id="p-image" accept="image/*" required>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn" style="flex: 1;">Save Product</button>
+                    <a href="manage-products.html" class="btn" style="flex: 1; background-color: #888; text-align: center; line-height: 20px;">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            auth.check();
+            loadCategories();
+        });
+
+        async function loadCategories() {
+            const { data } = await supabaseClient.from('categories').select('*');
+            const select = document.getElementById('p-category');
+            if (data) {
+                select.innerHTML = '<option value="">Select Category</option>' + 
+                    data.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+            }
+        }
+
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('p-name').value;
+            const price = parseFloat(document.getElementById('p-price').value);
+            const category_id = document.getElementById('p-category').value;
+            const description = document.getElementById('p-description').value;
+            const imageFile = document.getElementById('p-image').files[0];
+
+            let image_url = '';
+            if (imageFile) {
+                // Show loading state
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Uploading...';
+
+                image_url = await uploadImage(imageFile);
+                
+                if (!image_url) {
+                    alert("Image upload failed. Check Cloudinary configuration.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Product';
+                    return;
+                }
+            }
+
+            const productData = { name, price, category_id, description, image_url };
+
+            try {
+                const { error } = await supabaseClient.from('products').insert([productData]);
+                if (error) throw error;
+                alert("Product added successfully!");
+                window.location.href = 'manage-products.html';
+            } catch (err) {
+                alert("Error saving product: " + err.message);
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Product';
+            }
+        });
+    </script>
+</body>
+</html>
