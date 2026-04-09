@@ -171,13 +171,13 @@
             categories = data || [];
             const select = document.getElementById('p-category');
             select.innerHTML = '<option value="">Select Category</option>' + 
-                categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+                categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
         }
 
         async function loadProducts() {
             const { data, error } = await supabaseClient
                 .from('products')
-                .select('*, categories(name)')
+                .select('*')
                 .order('created_at', { ascending: false });
             
             const tbody = document.getElementById('products-table-body');
@@ -186,7 +186,7 @@
                     <tr>
                         <td><img src="${prod.image_url || 'https://via.placeholder.com/50'}" alt="${prod.name}"></td>
                         <td>${prod.name}</td>
-                        <td>${prod.categories?.name || 'N/A'}</td>
+                        <td>${prod.category || 'N/A'}</td>
                         <td>$${prod.price}</td>
                         <td>
                             <button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick='openModal("edit", ${JSON.stringify(prod).replace(/'/g, "&apos;")})'>Edit</button>
@@ -212,7 +212,7 @@
                 document.getElementById('product-id').value = product.id;
                 document.getElementById('p-name').value = product.name;
                 document.getElementById('p-price').value = product.price;
-                document.getElementById('p-category').value = product.category_id || '';
+                document.getElementById('p-category').value = product.category || '';
                 document.getElementById('p-description').value = product.description || '';
                 document.getElementById('p-image-url').value = product.image_url || '';
                 document.getElementById('image-url-display').textContent = product.image_url ? 'Current image: ' + product.image_url.split('/').pop() : '';
@@ -232,7 +232,7 @@
             const id = document.getElementById('product-id').value;
             const name = document.getElementById('p-name').value;
             const price = parseFloat(document.getElementById('p-price').value);
-            const category_id = document.getElementById('p-category').value;
+            const category = document.getElementById('p-category').value;
             const description = document.getElementById('p-description').value;
             const imageFile = document.getElementById('p-image').files[0];
             let image_url = document.getElementById('p-image-url').value;
@@ -245,7 +245,7 @@
                 }
             }
 
-            const productData = { name, price, category_id, description, image_url };
+            const productData = { name, price, category, description, image_url };
 
             try {
                 if (id) {

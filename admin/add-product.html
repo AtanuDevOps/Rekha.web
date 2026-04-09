@@ -104,8 +104,9 @@
             const { data } = await supabaseClient.from('categories').select('*');
             const select = document.getElementById('p-category');
             if (data) {
+                // Use category name as the value
                 select.innerHTML = '<option value="">Select Category</option>' + 
-                    data.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+                    data.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
             }
         }
 
@@ -113,7 +114,7 @@
             e.preventDefault();
             const name = document.getElementById('p-name').value;
             const price = parseFloat(document.getElementById('p-price').value);
-            const category_id = document.getElementById('p-category').value;
+            const category = document.getElementById('p-category').value;
             const description = document.getElementById('p-description').value;
             const imageFile = document.getElementById('p-image').files[0];
 
@@ -134,7 +135,8 @@
                 }
             }
 
-            const productData = { name, price, category_id, description, image_url };
+            // Save category name directly to 'category' column
+            const productData = { name, price, category, description, image_url };
 
             try {
                 const { error } = await supabaseClient.from('products').insert([productData]);

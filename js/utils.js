@@ -117,11 +117,26 @@ const auth = {
 };
 
 // UI Helpers
+function showLoading(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.innerHTML = `
+            <div class="loading-spinner" style="text-align: center; padding: 50px; width: 100%; grid-column: 1 / -1;">
+                <div class="spinner" style="border: 4px solid var(--primary-color); border-top: 4px solid var(--accent-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                <p style="margin-top: 15px; color: var(--accent-color);">Loading beautiful art...</p>
+            </div>
+            <style>
+                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            </style>
+        `;
+    }
+}
+
 function renderCard(item, type = 'product') {
     if (type === 'category') {
         return `
             <div class="card">
-                <a href="products.html?category=${item.id}">
+                <a href="products.html?category=${encodeURIComponent(item.name)}">
                     <img src="${item.image || 'https://via.placeholder.com/400x300?text=Category'}" alt="${item.name}" class="card-img">
                     <div class="card-content">
                         <h3 class="card-title">${item.name}</h3>
@@ -139,7 +154,7 @@ function renderCard(item, type = 'product') {
             <div class="card-content">
                 <h3 class="card-title">${item.name}</h3>
                 <p class="card-price">$${item.price}</p>
-                <button onclick='cart.add(${JSON.stringify(item)})' class="btn" style="width: 100%;">Add to Cart</button>
+                <button onclick='cart.add(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="btn" style="width: 100%;">Add to Cart</button>
             </div>
         </div>
     `;
