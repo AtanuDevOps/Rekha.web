@@ -4,4 +4,4 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Cloudinary Configuration (for image uploads in admin)
 const CLOUDINARY_CLOUD_NAME = "dgxyhfwjy";
-const CLOUDINARY_UPLOAD_PRESET = "rekha_upload";
+const CLOUDINARY_UPLOAD_PRESET = "artsy_upload";

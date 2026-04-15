@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - REKHA</title>
+    <title>Admin Dashboard - Artsy Avenue</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
@@ -45,7 +45,7 @@
 <body>
     <div class="admin-nav">
         <div class="container">
-            <h2 class="logo">REKHA Admin</h2>
+            <h2 class="logo">Artsy Avenue Admin</h2>
             <div class="nav-links">
                 <a href="dashboard.html">Dashboard</a>
                 <a href="manage-products.html">Manage Products</a>
@@ -85,7 +85,7 @@
             auth.check();
 
             // Display admin name
-            const user = JSON.parse(localStorage.getItem('rekha_admin_user'));
+            const user = JSON.parse(localStorage.getItem('artsy_admin_user'));
             if (user) {
                 document.getElementById('admin-welcome').textContent = `Welcome back, ${user.name}`;
             }

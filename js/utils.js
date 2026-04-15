@@ -37,7 +37,7 @@ initSupabase();
 
 // Cart Logic
 const cart = {
-    get: () => JSON.parse(localStorage.getItem('rekha_cart')) || [],
+    get: () => JSON.parse(localStorage.getItem('artsy_cart')) || [],
     add: (product, quantity = 1) => {
         const items = cart.get();
         const existing = items.find(i => i.id === product.id);
@@ -46,13 +46,13 @@ const cart = {
         } else {
             items.push({ ...product, quantity });
         }
-        localStorage.setItem('rekha_cart', JSON.stringify(items));
+        localStorage.setItem('artsy_cart', JSON.stringify(items));
         cart.updateCountUI();
         alert(`${product.name} added to cart!`);
     },
     remove: (productId) => {
         const items = cart.get().filter(i => i.id !== productId);
-        localStorage.setItem('rekha_cart', JSON.stringify(items));
+        localStorage.setItem('artsy_cart', JSON.stringify(items));
         cart.updateCountUI();
     },
     updateQuantity: (productId, quantity) => {
@@ -61,12 +61,12 @@ const cart = {
         if (item) {
             item.quantity = parseInt(quantity);
             if (item.quantity <= 0) return cart.remove(productId);
-            localStorage.setItem('rekha_cart', JSON.stringify(items));
+            localStorage.setItem('artsy_cart', JSON.stringify(items));
             cart.updateCountUI();
         }
     },
     clear: () => {
-        localStorage.removeItem('rekha_cart');
+        localStorage.removeItem('artsy_cart');
         cart.updateCountUI();
     },
     total: () => {
@@ -82,7 +82,7 @@ const cart = {
 // Auth Helpers
 const auth = {
     check: () => {
-        const isLoggedIn = localStorage.getItem("rekha_admin_logged_in") === "true";
+        const isLoggedIn = localStorage.getItem("artsy_admin_logged_in") === "true";
         if (!isLoggedIn) {
             window.location.href = 'login.html';
         }
@@ -98,8 +98,8 @@ const auth = {
                 .single();
 
             if (data) {
-                localStorage.setItem("rekha_admin_logged_in", "true");
-                localStorage.setItem("rekha_admin_user", JSON.stringify(data));
+                localStorage.setItem("artsy_admin_logged_in", "true");
+                localStorage.setItem("artsy_admin_user", JSON.stringify(data));
                 return { success: true };
             } else {
                 return { success: false, message: "Invalid email or password" };
@@ -110,8 +110,8 @@ const auth = {
         }
     },
     logout: () => {
-        localStorage.removeItem("rekha_admin_logged_in");
-        localStorage.removeItem("rekha_admin_user");
+        localStorage.removeItem("artsy_admin_logged_in");
+        localStorage.removeItem("artsy_admin_user");
         window.location.href = 'login.html';
     }
 };
@@ -148,7 +148,7 @@ function renderCard(item, type = 'product') {
     }
     return `
         <div class="card">
-            <a href="product-details.html?id=${item.id}">
+            <a href="product.html?id=${item.id}">
                 <img src="${item.image_url || 'https://via.placeholder.com/400x300?text=Product'}" alt="${item.name}" class="card-img">
             </a>
             <div class="card-content">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Details - REKHA</title>
+    <title>Product Details - Artsy Avenue</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
@@ -53,7 +53,7 @@
     <header>
         <div class="container">
             <nav>
-                <a href="index.html" class="logo">REKHA</a>
+                <a href="index.html" class="logo">Artsy Avenue</a>
                 <ul class="nav-links">
                     <li><a href="index.html">Home</a></li>
                     <li><a href="categories.html">Categories</a></li>
@@ -78,7 +78,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div>
-                    <h3>REKHA</h3>
+                    <h3>Artsy Avenue</h3>
                     <p>Authentic handmade art and craft store. We bring creativity to your doorstep.</p>
                 </div>
                 <div>
@@ -92,12 +92,12 @@
                 </div>
                 <div>
                     <h3>Contact Us</h3>
-                    <p>Email: hello@rekha.web</p>
+                    <p>Email: hello@artsyavenue.web</p>
                     <p>Phone: +1 234 567 890</p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 REKHA Art & Craft Store. All rights reserved.</p>
+                <p>&copy; 2026 Artsy Avenue Art & Craft Store. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -111,31 +111,27 @@
             const container = document.getElementById('product-content');
 
             if (!productId) {
-                container.innerHTML = "<h2>Product not found</h2>";
+                container.innerHTML = "<div style='grid-column: 1/-1; text-align: center;'><h2>Product not found</h2><a href='products.html' class='btn' style='margin-top: 20px;'>Back to Products</a></div>";
                 return;
             }
+
+            showLoading('product-content');
 
             try {
                 const { data: product, error } = await supabaseClient
                     .from('products')
-                    .select('*, categories(name)')
+                    .select('*')
                     .eq('id', productId)
                     .single();
                 
                 if (product) {
                     renderProduct(product);
                 } else {
-                    // Demo data fallback
-                    const demoProds = [
-                        { id: 1, name: "Ceramic Mug", price: 25, description: "A beautiful hand-thrown ceramic mug with a matte finish. Perfect for your morning coffee or tea.", image_url: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&q=80&w=800", category: "Handmade Pottery" },
-                        { id: 2, name: "Boho Wall Hanging", price: 45, description: "Intricate macrame wall art that adds a bohemian touch to any room.", image_url: "https://images.unsplash.com/photo-1544413647-b5104439950a?auto=format&fit=crop&q=80&w=800", category: "Macrame Art" }
-                    ];
-                    const prod = demoProds.find(p => p.id == productId);
-                    if (prod) renderProduct(prod);
-                    else container.innerHTML = "<h2>Product not found</h2>";
+                    container.innerHTML = "<div style='grid-column: 1/-1; text-align: center;'><h2>Product not found</h2><a href='products.html' class='btn' style='margin-top: 20px;'>Back to Products</a></div>";
                 }
             } catch (e) {
                 console.error("Error fetching product:", e);
+                container.innerHTML = "<div style='grid-column: 1/-1; text-align: center;'><h2>Error loading product</h2><p>Please try again later.</p></div>";
             }
 
             function renderProduct(product) {
@@ -144,15 +140,16 @@
                         <img src="${product.image_url || 'https://via.placeholder.com/600x600?text=Product'}" alt="${product.name}" class="product-img">
                     </div>
                     <div class="product-info">
-                        <p style="color: #888; text-transform: uppercase; font-size: 0.8rem;">${product.categories?.name || product.category || 'Art'}</p>
+                        <p style="color: #888; text-transform: uppercase; font-size: 0.8rem;">${product.category || 'Handmade Art'}</p>
                         <h1>${product.name}</h1>
                         <p class="product-price">$${product.price}</p>
                         <div class="product-desc">
-                            <p>${product.description || 'No description available for this beautiful handmade piece.'}</p>
+                            <p>${product.description || 'This is a unique, handcrafted piece created with passion and care. Perfect for adding a touch of artistic beauty to your collection.'}</p>
                         </div>
                         <div class="product-actions">
+                            <label for="qty" style="display: block; margin-bottom: 10px; font-weight: 600;">Quantity:</label>
                             <input type="number" id="qty" value="1" min="1" class="qty-input">
-                            <button onclick="addToCartWithQty(${JSON.stringify(product).replace(/"/g, '&quot;')})" class="btn">Add to Cart</button>
+                            <button onclick='addToCartWithQty(${JSON.stringify(product).replace(/'/g, "&apos;")})' class="btn">Add to Cart</button>
                         </div>
                     </div>
                 `;
