@@ -179,4 +179,73 @@ async function uploadImage(file) {
 }
 
 // Initial count update
-document.addEventListener('DOMContentLoaded', cart.updateCountUI);
+document.addEventListener('DOMContentLoaded', () => {
+    cart.updateCountUI();
+    initSearch();
+});
+
+// Search Logic
+function initSearch() {
+    const searchInput = document.getElementById('search-input');
+    const suggestionsContainer = document.getElementById('search-suggestions');
+    let debounceTimer;
+
+    if (!searchInput || !suggestionsContainer) return;
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        
+        clearTimeout(debounceTimer);
+        
+        if (query.length === 0) {
+            suggestionsContainer.style.display = 'none';
+            return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+            try {
+                // Fetch products matching name or category
+                const { data: products, error } = await supabaseClient
+                    .from('products')
+                    .select('id, name, price, image_url, category')
+                    .or(`name.ilike.%${query}%,category.ilike.%${query}%`)
+                    .limit(6);
+
+                if (error) throw error;
+
+                suggestionsContainer.innerHTML = '';
+                
+                if (products && products.length > 0) {
+                    products.forEach(product => {
+                        const item = document.createElement('a');
+                        item.href = `product.html?id=${product.id}`;
+                        item.className = 'search-suggestion-item';
+                        item.innerHTML = `
+                            <img src="${product.image_url || 'https://via.placeholder.com/40x40?text=P'}" alt="${product.name}" class="search-suggestion-img">
+                            <div class="search-suggestion-info">
+                                <div class="search-suggestion-title">${product.name}</div>
+                                <div style="font-size: 0.75rem; color: #888;">${product.category || ''}</div>
+                            </div>
+                            <div class="search-suggestion-price">$${product.price}</div>
+                        `;
+                        suggestionsContainer.appendChild(item);
+                    });
+                } else {
+                    suggestionsContainer.innerHTML = '<div class="search-no-results">No products found</div>';
+                }
+                
+                suggestionsContainer.style.display = 'block';
+
+            } catch (err) {
+                console.error("Search error:", err);
+            }
+        }, 300); // 300ms debounce
+    });
+}
