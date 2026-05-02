@@ -6,49 +6,316 @@
     <title>Artsy Avenue - Art & Craft Store</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --premium-beige: #f5f5f0;
+            --premium-cream: #fffdfa;
+            --premium-brown: #4a3728;
+            --premium-accent: #d4a373;
+            --soft-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            background-color: var(--premium-beige);
+            color: var(--premium-brown);
+        }
+
+        /* Navbar Redesign */
+        header {
+            background-color: rgba(255, 253, 250, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            border-bottom: none;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 0;
+            color: var(--premium-brown);
+        }
+
+        .nav-actions-minimal {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-icon {
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .cart-icon-minimal {
+            position: relative;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background-color: var(--premium-accent);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 5px;
+            border-radius: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+        }
+
+        /* Search Overlay */
+        .search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 253, 250, 0.98);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 100px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .search-overlay-close {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .search-box-premium {
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .search-input-premium {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid var(--premium-brown);
+            background: transparent;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            padding: 10px 0;
+            outline: none;
+        }
+
+        /* Hero Section Premium */
+        .hero-premium {
+            padding: 80px 0 40px;
+            text-align: center;
+        }
+
+        .hero-premium h1 {
+            font-size: 2.8rem;
+            line-height: 1.2;
+            margin-bottom: 15px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .hero-premium p {
+            font-size: 1rem;
+            color: #6a5a4d;
+            font-family: 'Montserrat', sans-serif;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        /* Category Cards Premium */
+        .category-grid-premium {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            padding: 20px 0 60px;
+        }
+
+        .category-card-premium {
+            position: relative;
+            height: 450px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--soft-shadow);
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            animation: slideUp 0.6s ease backwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .category-card-premium:active {
+            transform: scale(0.98);
+        }
+
+        .category-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .category-card-premium:hover .category-bg {
+            transform: scale(1.05);
+        }
+
+        .category-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to top, rgba(74, 55, 40, 0.8), transparent);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 30px;
+            color: var(--premium-cream);
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 253, 250, 0.2);
+            backdrop-filter: blur(5px);
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .category-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+
+        .category-subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .explore-btn-premium {
+            align-self: center;
+            padding: 10px 25px;
+            background: transparent;
+            border: 1px solid rgba(255, 253, 250, 0.6);
+            color: var(--premium-cream);
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .category-card-premium:hover .explore-btn-premium {
+            background: var(--premium-cream);
+            color: var(--premium-brown);
+        }
+
+        /* Adjust footer */
+        footer {
+            background-color: var(--premium-cream);
+            border-top: none;
+            padding-top: 40px;
+        }
+
+        @media (min-width: 768px) {
+            .category-grid-premium {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .hero-premium h1 {
+                font-size: 4rem;
+            }
+            .hero-premium p {
+                max-width: 500px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .category-grid-premium {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
         <div class="container">
             <nav>
                 <a href="index.html" class="logo">Artsy Avenue</a>
-                <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="categories.html">Categories</a></li>
-                    <li><a href="products.html">All Products</a></li>
-                </ul>
-                <div class="search-container">
-                    <input type="text" id="search-input" class="search-input" placeholder="Search art & crafts...">
-                    <div id="search-suggestions" class="search-suggestions"></div>
-                </div>
-                <div class="nav-actions">
-                    <a href="cart.html" class="cart-icon">
-                        🛒 <span class="cart-count">0</span>
+                <div class="nav-actions-minimal">
+                    <div class="nav-icon" id="search-trigger">🔍</div>
+                    <a href="cart.html" class="nav-icon cart-icon-minimal">
+                        🛒 <span class="cart-badge cart-count">0</span>
                     </a>
                 </div>
             </nav>
         </div>
     </header>
 
+    <!-- Search Overlay -->
+    <div id="search-overlay" class="search-overlay">
+        <div class="search-overlay-close" id="search-close">&times;</div>
+        <div class="search-box-premium">
+            <input type="text" id="search-input" class="search-input-premium" placeholder="Search art & crafts..." autocomplete="off">
+            <div id="search-suggestions" class="search-suggestions" style="width: 100%; top: 100%;"></div>
+        </div>
+    </div>
+
     <main>
-        <section class="hero">
+        <section class="hero-premium">
             <div class="container">
                 <h1>Crafting Beauty into Every Detail</h1>
                 <p>Discover unique, handmade art and craft pieces for your home and soul.</p>
-                <a href="#categories-section" class="btn">Explore Collections</a>
             </div>
         </section>
 
         <section id="categories-section" class="container">
-            <h2 class="section-title">Shop by Category</h2>
-            <div id="homepage-categories" class="card-grid">
+            <div id="homepage-categories-premium" class="category-grid-premium">
                 <!-- Dynamically loaded -->
             </div>
-            <div style="text-align: center; margin-top: 40px;">
-                <a href="categories.html" class="btn">View All Categories</a>
+            <div style="text-align: center; margin-top: 20px; margin-bottom: 60px;">
+                <a href="categories.html" class="btn" style="background: transparent; color: var(--premium-brown); border: 1px solid var(--premium-brown);">View All Categories</a>
             </div>
         </section>
     </main>
@@ -71,7 +338,7 @@
                 </div>
                 <div>
                     <h3>Contact Us</h3>
-                    <p>Email: hello@rekha.web</p>
+                    <p>Email: hello@artsyavenue.web</p>
                     <p>Phone: +1 234 567 890</p>
                 </div>
             </div>
@@ -83,6 +350,75 @@
 
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initial UI count
+            cart.updateCountUI();
+
+            // Search Toggle Logic
+            const searchTrigger = document.getElementById('search-trigger');
+            const searchOverlay = document.getElementById('search-overlay');
+            const searchClose = document.getElementById('search-close');
+            const searchInput = document.getElementById('search-input');
+
+            searchTrigger.addEventListener('click', () => {
+                searchOverlay.style.display = 'flex';
+                searchInput.focus();
+            });
+
+            searchClose.addEventListener('click', () => {
+                searchOverlay.style.display = 'none';
+            });
+
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') searchOverlay.style.display = 'none';
+            });
+
+            // Fetch Categories and Product Counts
+            const container = document.getElementById('homepage-categories-premium');
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px;">Loading collections...</div>';
+
+            try {
+                // Fetch categories
+                const { data: categories, error: catError } = await supabaseClient
+                    .from('categories')
+                    .select('*')
+                    .limit(6);
+
+                if (catError) throw catError;
+
+                // Fetch product counts for each category
+                // We'll do this in parallel for performance
+                const categoriesWithCounts = await Promise.all(categories.map(async (cat) => {
+                    const { count, error: countError } = await supabaseClient
+                        .from('products')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('category', cat.name);
+                    
+                    return { ...cat, productCount: count || 0 };
+                }));
+
+                if (categoriesWithCounts && categoriesWithCounts.length > 0) {
+                    container.innerHTML = categoriesWithCounts.map((cat, index) => `
+                        <div class="category-card-premium" style="animation-delay: ${index * 0.1}s" onclick="location.href='products.html?category=${encodeURIComponent(cat.name)}'">
+                            <img src="${cat.image || 'https://via.placeholder.com/600x800?text=' + encodeURIComponent(cat.name)}" alt="${cat.name}" class="category-bg">
+                            <div class="category-badge">${cat.productCount} ITEMS</div>
+                            <div class="category-overlay">
+                                <h3 class="category-name">${cat.name}</h3>
+                                <p class="category-subtitle">Explore Collection</p>
+                                <button class="explore-btn-premium">Explore</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No collections found.</p>';
+                }
+            } catch (e) {
+                console.error("Error loading categories:", e);
+                container.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">Error loading collections.</p>';
+            }
+        });
+    </script>
 </body>
 </html>
