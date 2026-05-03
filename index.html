@@ -148,132 +148,71 @@
             margin: 0 auto;
         }
 
-        /* Category Cards Premium */
-        .category-grid-premium {
+        /* Category Cards Gallery Style */
+        .category-grid-gallery {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-            padding: 20px 0 60px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px 0;
         }
 
-        .category-card-premium {
-            position: relative;
-            height: 450px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--soft-shadow);
+        .category-item-gallery {
             cursor: pointer;
-            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            animation: slideUp 0.6s ease backwards;
+            transition: transform 0.2s ease;
+            text-align: center;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        .category-item-gallery:active {
+            transform: scale(0.96);
         }
 
-        .category-card-premium:active {
-            transform: scale(0.98);
+        .category-img-container {
+            width: 100%;
+            aspect-ratio: 1 / 1.2;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 10px;
         }
 
-        .category-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .category-img-gallery {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.6s ease;
+            transition: transform 0.3s ease;
         }
 
-        .category-card-premium:hover .category-bg {
+        .category-item-gallery:hover .category-img-gallery {
             transform: scale(1.05);
         }
 
-        .category-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60%;
-            background: linear-gradient(to top, rgba(74, 55, 40, 0.8), transparent);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 30px;
-            color: var(--premium-cream);
-        }
-
-        .category-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 253, 250, 0.2);
-            backdrop-filter: blur(5px);
-            padding: 6px 12px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .category-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
-            margin-bottom: 5px;
-        }
-
-        .category-subtitle {
+        .category-name-gallery {
             font-family: 'Montserrat', sans-serif;
-            font-size: 0.85rem;
-            opacity: 0.9;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .explore-btn-premium {
-            align-self: center;
-            padding: 10px 25px;
-            background: transparent;
-            border: 1px solid rgba(255, 253, 250, 0.6);
-            color: var(--premium-cream);
-            border-radius: 30px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-
-        .category-card-premium:hover .explore-btn-premium {
-            background: var(--premium-cream);
+            font-size: 0.95rem;
+            font-weight: 600;
             color: var(--premium-brown);
+            margin: 0;
         }
 
-        /* Adjust footer */
-        footer {
-            background-color: var(--premium-cream);
-            border-top: none;
-            padding-top: 40px;
+        /* Adjust hero for gallery style */
+        .hero-premium {
+            padding: 60px 0 20px;
+            text-align: center;
         }
 
         @media (min-width: 768px) {
-            .category-grid-premium {
-                grid-template-columns: repeat(2, 1fr);
+            .category-grid-gallery {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 25px;
             }
-            .hero-premium h1 {
-                font-size: 4rem;
-            }
-            .hero-premium p {
-                max-width: 500px;
+            .category-name-gallery {
+                font-size: 1.1rem;
             }
         }
 
         @media (min-width: 1024px) {
-            .category-grid-premium {
-                grid-template-columns: repeat(3, 1fr);
+            .category-grid-gallery {
+                grid-template-columns: repeat(4, 1fr);
             }
         }
     </style>
@@ -311,10 +250,10 @@
         </section>
 
         <section id="categories-section" class="container">
-            <div id="homepage-categories-premium" class="category-grid-premium">
+            <div id="homepage-categories-gallery" class="category-grid-gallery">
                 <!-- Dynamically loaded -->
             </div>
-            <div style="text-align: center; margin-top: 20px; margin-bottom: 60px;">
+            <div style="text-align: center; margin-top: 40px; margin-bottom: 60px;">
                 <a href="categories.html" class="btn" style="background: transparent; color: var(--premium-brown); border: 1px solid var(--premium-brown);">View All Categories</a>
             </div>
         </section>
@@ -376,7 +315,7 @@
             });
 
             // Fetch Categories and Product Counts
-            const container = document.getElementById('homepage-categories-premium');
+            const container = document.getElementById('homepage-categories-gallery');
             container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px;">Loading collections...</div>';
 
             try {
@@ -384,31 +323,17 @@
                 const { data: categories, error: catError } = await supabaseClient
                     .from('categories')
                     .select('*')
-                    .limit(6);
+                    .limit(8); // Show more in the 2-column grid
 
                 if (catError) throw catError;
 
-                // Fetch product counts for each category
-                // We'll do this in parallel for performance
-                const categoriesWithCounts = await Promise.all(categories.map(async (cat) => {
-                    const { count, error: countError } = await supabaseClient
-                        .from('products')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('category', cat.name);
-                    
-                    return { ...cat, productCount: count || 0 };
-                }));
-
-                if (categoriesWithCounts && categoriesWithCounts.length > 0) {
-                    container.innerHTML = categoriesWithCounts.map((cat, index) => `
-                        <div class="category-card-premium" style="animation-delay: ${index * 0.1}s" onclick="location.href='products.html?category=${encodeURIComponent(cat.name)}'">
-                            <img src="${cat.image || 'https://via.placeholder.com/600x800?text=' + encodeURIComponent(cat.name)}" alt="${cat.name}" class="category-bg">
-                            <div class="category-badge">${cat.productCount} ITEMS</div>
-                            <div class="category-overlay">
-                                <h3 class="category-name">${cat.name}</h3>
-                                <p class="category-subtitle">Explore Collection</p>
-                                <button class="explore-btn-premium">Explore</button>
+                if (categories && categories.length > 0) {
+                    container.innerHTML = categories.map((cat, index) => `
+                        <div class="category-item-gallery" onclick="location.href='products.html?category=${encodeURIComponent(cat.name)}'">
+                            <div class="category-img-container">
+                                <img src="${cat.image || 'https://via.placeholder.com/600x800?text=' + encodeURIComponent(cat.name)}" alt="${cat.name}" class="category-img-gallery">
                             </div>
+                            <h3 class="category-name-gallery">${cat.name}</h3>
                         </div>
                     `).join('');
                 } else {
