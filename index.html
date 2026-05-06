@@ -215,6 +215,124 @@
                 grid-template-columns: repeat(4, 1fr);
             }
         }
+
+        /* Hot Products Slider */
+        .hot-slider-section {
+            margin: 20px 0 40px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hot-slider-container {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .hot-slide {
+            min-width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .hot-card {
+            background: var(--premium-cream);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--soft-shadow);
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+            position: relative;
+        }
+
+        .hot-img {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+        }
+
+        .hot-info {
+            padding: 20px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hot-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .hot-price {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--premium-accent);
+            font-size: 1.2rem;
+        }
+
+        .hot-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #ff4d4d;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(255, 77, 77, 0.3);
+        }
+
+        .slider-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: var(--premium-accent);
+            width: 20px;
+            border-radius: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .hot-slide {
+                padding: 0 100px;
+            }
+            .hot-card {
+                height: 500px;
+                flex-direction: row;
+            }
+            .hot-img {
+                width: 60%;
+                height: 100%;
+            }
+            .hot-info {
+                width: 40%;
+                text-align: left;
+                padding: 40px;
+            }
+            .hot-name {
+                font-size: 2.2rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -246,6 +364,16 @@
             <div class="container">
                 <h1>Crafting Beauty into Every Detail</h1>
                 <p>Discover unique, handmade art and craft pieces for your home and soul.</p>
+            </div>
+        </section>
+
+        <!-- Hot Products Slider -->
+        <section id="hot-products-slider" class="hot-slider-section" style="display: none;">
+            <div class="hot-slider-container" id="slider-inner">
+                <!-- Dynamically loaded -->
+            </div>
+            <div class="slider-dots" id="slider-dots">
+                <!-- Dynamically loaded -->
             </div>
         </section>
 
@@ -314,7 +442,81 @@
                 if (e.key === 'Escape') searchOverlay.style.display = 'none';
             });
 
-            // Fetch Categories and Product Counts
+            // --- Hot Products Slider Logic ---
+            const sliderSection = document.getElementById('hot-products-slider');
+            const sliderInner = document.getElementById('slider-inner');
+            const sliderDots = document.getElementById('slider-dots');
+            let currentSlide = 0;
+            let slideInterval;
+
+            async function loadHotProducts() {
+                try {
+                    const { data: hotProducts, error } = await supabaseClient
+                        .from('products')
+                        .select('*')
+                        .eq('is_hot', true)
+                        .limit(5);
+
+                    if (error) throw error;
+
+                    if (hotProducts && hotProducts.length > 0) {
+                        sliderSection.style.display = 'block';
+                        
+                        // Render Slides
+                        sliderInner.innerHTML = hotProducts.map(prod => `
+                            <div class="hot-slide" onclick="location.href='product.html?id=${prod.id}'">
+                                <div class="hot-card">
+                                    <div class="hot-badge">Hot Item</div>
+                                    <img src="${prod.image_url}" alt="${prod.name}" class="hot-img">
+                                    <div class="hot-info">
+                                        <h2 class="hot-name">${prod.name}</h2>
+                                        <p class="hot-price">$${prod.price}</p>
+                                        <p style="margin-top: 10px; font-size: 0.9rem; color: #888;">Limited edition handmade piece.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+
+                        // Render Dots
+                        sliderDots.innerHTML = hotProducts.map((_, i) => `
+                            <div class="dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></div>
+                        `).join('');
+
+                        startAutoSlide(hotProducts.length);
+                    }
+                } catch (err) {
+                    console.error("Error loading hot products:", err);
+                }
+            }
+
+            window.goToSlide = (index) => {
+                const slides = document.querySelectorAll('.hot-slide');
+                if (index >= slides.length) index = 0;
+                if (index < 0) index = slides.length - 1;
+                
+                currentSlide = index;
+                sliderInner.style.transform = `translateX(-${currentSlide * 100}%)`;
+                
+                // Update dots
+                document.querySelectorAll('.dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentSlide);
+                });
+
+                // Reset interval on manual click
+                clearInterval(slideInterval);
+                startAutoSlide(slides.length);
+            };
+
+            function startAutoSlide(count) {
+                slideInterval = setInterval(() => {
+                    goToSlide(currentSlide + 1);
+                }, 4000);
+            }
+
+            // Initial load
+            loadHotProducts();
+
+            // --- Category Grid Logic ---
             const container = document.getElementById('homepage-categories-gallery');
             container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px;">Loading collections...</div>';
 

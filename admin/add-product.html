@@ -84,7 +84,11 @@
                     <label>Product Image</label>
                     <input type="file" id="p-image" accept="image/*" required>
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                    <input type="checkbox" id="p-is-hot" style="width: auto;">
+                    <label for="p-is-hot" style="margin-bottom: 0;">Mark as Hot Product (Featured in Slider)</label>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 30px;">
                     <button type="submit" class="btn" style="flex: 1;">Save Product</button>
                     <a href="manage-products.html" class="btn" style="flex: 1; background-color: #888; text-align: center; line-height: 20px;">Cancel</a>
                 </div>
@@ -116,6 +120,7 @@
             const price = parseFloat(document.getElementById('p-price').value);
             const category = document.getElementById('p-category').value;
             const description = document.getElementById('p-description').value;
+            const is_hot = document.getElementById('p-is-hot').checked;
             const imageFile = document.getElementById('p-image').files[0];
 
             let image_url = '';
@@ -136,7 +141,7 @@
             }
 
             // Save category name directly to 'category' column
-            const productData = { name, price, category, description, image_url };
+            const productData = { name, price, category, description, image_url, is_hot };
 
             try {
                 const { error } = await supabaseClient.from('products').insert([productData]);

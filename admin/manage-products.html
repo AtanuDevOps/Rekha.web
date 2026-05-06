@@ -147,6 +147,10 @@
                     <p id="image-url-display" style="font-size: 0.8rem; color: #888; margin-top: 5px;"></p>
                     <input type="hidden" id="p-image-url">
                 </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="p-is-hot" style="width: auto;">
+                    <label for="p-is-hot" style="margin-bottom: 0;">Mark as Hot Product</label>
+                </div>
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="btn" style="flex: 1;">Save Product</button>
                     <button type="button" class="btn" style="flex: 1; background-color: #888;" onclick="closeModal()">Cancel</button>
@@ -214,11 +218,13 @@
                 document.getElementById('p-price').value = product.price;
                 document.getElementById('p-category').value = product.category || '';
                 document.getElementById('p-description').value = product.description || '';
+                document.getElementById('p-is-hot').checked = product.is_hot || false;
                 document.getElementById('p-image-url').value = product.image_url || '';
                 document.getElementById('image-url-display').textContent = product.image_url ? 'Current image: ' + product.image_url.split('/').pop() : '';
             } else {
                 title.textContent = 'Add New Product';
                 document.getElementById('product-id').value = '';
+                document.getElementById('p-is-hot').checked = false;
             }
             modal.style.display = 'flex';
         }
@@ -234,6 +240,7 @@
             const price = parseFloat(document.getElementById('p-price').value);
             const category = document.getElementById('p-category').value;
             const description = document.getElementById('p-description').value;
+            const is_hot = document.getElementById('p-is-hot').checked;
             const imageFile = document.getElementById('p-image').files[0];
             let image_url = document.getElementById('p-image-url').value;
 
@@ -245,7 +252,7 @@
                 }
             }
 
-            const productData = { name, price, category, description, image_url };
+            const productData = { name, price, category, description, image_url, is_hot };
 
             try {
                 if (id) {
