@@ -6,383 +6,51 @@
     <title>Artsy Avenue - Art & Craft Store</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --premium-beige: #f5f5f0;
-            --premium-cream: #fffdfa;
-            --premium-brown: #4a3728;
-            --premium-accent: #d4a373;
-            --soft-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        }
-
-        body {
-            background-color: var(--premium-beige);
-            color: var(--premium-brown);
-        }
-
-        /* Navbar Redesign */
-        header {
-            background-color: rgba(255, 253, 250, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 15px 0;
-            border-bottom: none;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: 900;
-            letter-spacing: 0;
-            color: var(--premium-brown);
-        }
-
-        .nav-actions-minimal {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .nav-icon {
-            font-size: 1.4rem;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-icon:hover {
-            transform: scale(1.1);
-        }
-
-        .cart-icon-minimal {
-            position: relative;
-        }
-
-        .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: -8px;
-            background-color: var(--premium-accent);
-            color: white;
-            font-size: 0.65rem;
-            padding: 2px 5px;
-            border-radius: 10px;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-        }
-
-        /* Search Overlay */
-        .search-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 253, 250, 0.98);
-            z-index: 2000;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 100px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .search-overlay-close {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            font-size: 2rem;
-            cursor: pointer;
-        }
-
-        .search-box-premium {
-            width: 90%;
-            max-width: 600px;
-            position: relative;
-        }
-
-        .search-input-premium {
-            width: 100%;
-            border: none;
-            border-bottom: 2px solid var(--premium-brown);
-            background: transparent;
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            padding: 10px 0;
-            outline: none;
-        }
-
-        /* Hero Section Premium */
-        .hero-premium {
-            padding: 80px 0 40px;
-            text-align: center;
-        }
-
-        .hero-premium h1 {
-            font-size: 2.8rem;
-            line-height: 1.2;
-            margin-bottom: 15px;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .hero-premium p {
-            font-size: 1rem;
-            color: #6a5a4d;
-            font-family: 'Montserrat', sans-serif;
-            max-width: 300px;
-            margin: 0 auto;
-        }
-
-        /* Category Cards Gallery Style */
-        .category-grid-gallery {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            padding: 20px 0;
-        }
-
-        .category-item-gallery {
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            text-align: center;
-        }
-
-        .category-item-gallery:active {
-            transform: scale(0.96);
-        }
-
-        .category-img-container {
-            width: 100%;
-            aspect-ratio: 1 / 1.2;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 10px;
-        }
-
-        .category-img-gallery {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .category-item-gallery:hover .category-img-gallery {
-            transform: scale(1.05);
-        }
-
-        .category-name-gallery {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--premium-brown);
-            margin: 0;
-        }
-
-        /* Adjust hero for gallery style */
-        .hero-premium {
-            padding: 60px 0 20px;
-            text-align: center;
-        }
-
-        @media (min-width: 768px) {
-            .category-grid-gallery {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 25px;
-            }
-            .category-name-gallery {
-                font-size: 1.1rem;
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .category-grid-gallery {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        /* Hot Products Slider */
-        .hot-slider-section {
-            margin: 20px 0 40px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .hot-slider-container {
-            display: flex;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 100%;
-        }
-
-        .hot-slide {
-            min-width: 100%;
-            padding: 0 20px;
-            box-sizing: border-box;
-            cursor: pointer;
-        }
-
-        .hot-card {
-            background: var(--premium-cream);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--soft-shadow);
-            display: flex;
-            flex-direction: column;
-            height: 400px;
-            position: relative;
-        }
-
-        .hot-img {
-            width: 100%;
-            height: 70%;
-            object-fit: cover;
-        }
-
-        .hot-info {
-            padding: 20px;
-            text-align: center;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .hot-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-
-        .hot-price {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 700;
-            color: var(--premium-accent);
-            font-size: 1.2rem;
-        }
-
-        .hot-badge {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #ff4d4d;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 10px rgba(255, 77, 77, 0.3);
-        }
-
-        .slider-dots {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ddd;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .dot.active {
-            background: var(--premium-accent);
-            width: 20px;
-            border-radius: 10px;
-        }
-
-        @media (min-width: 768px) {
-            .hot-slide {
-                padding: 0 100px;
-            }
-            .hot-card {
-                height: 500px;
-                flex-direction: row;
-            }
-            .hot-img {
-                width: 60%;
-                height: 100%;
-            }
-            .hot-info {
-                width: 40%;
-                text-align: left;
-                padding: 40px;
-            }
-            .hot-name {
-                font-size: 2.2rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <header>
         <div class="container">
             <nav>
                 <a href="index.html" class="logo">Artsy Avenue</a>
-                <div class="nav-actions-minimal">
-                    <div class="nav-icon" id="search-trigger">🔍</div>
-                    <a href="cart.html" class="nav-icon cart-icon-minimal">
-                        🛒 <span class="cart-badge cart-count">0</span>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="categories.html">Categories</a></li>
+                    <li><a href="products.html">All Products</a></li>
+                </ul>
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search art & crafts...">
+                    <div id="search-suggestions" class="search-suggestions"></div>
+                </div>
+                <div class="nav-actions">
+                    <a href="cart.html" class="cart-icon">
+                        🛒 <span class="cart-count">0</span>
                     </a>
                 </div>
             </nav>
         </div>
     </header>
 
-    <!-- Search Overlay -->
-    <div id="search-overlay" class="search-overlay">
-        <div class="search-overlay-close" id="search-close">&times;</div>
-        <div class="search-box-premium">
-            <input type="text" id="search-input" class="search-input-premium" placeholder="Search art & crafts..." autocomplete="off">
-            <div id="search-suggestions" class="search-suggestions" style="width: 100%; top: 100%;"></div>
-        </div>
-    </div>
-
     <main>
-        <section class="hero-premium">
-            <div class="container">
-                <h1>Crafting Beauty into Every Detail</h1>
-                <p>Discover unique, handmade art and craft pieces for your home and soul.</p>
-            </div>
-        </section>
-
         <!-- Hot Products Slider -->
-        <section id="hot-products-slider" class="hot-slider-section" style="display: none;">
-            <div class="hot-slider-container" id="slider-inner">
-                <!-- Dynamically loaded -->
-            </div>
-            <div class="slider-dots" id="slider-dots">
-                <!-- Dynamically loaded -->
+        <section id="hot-products-slider" class="container" style="display: none; margin-top: 30px;">
+            <h2 class="section-title">Featured Pieces</h2>
+            <div class="slider-wrapper" style="overflow: hidden; position: relative; border-radius: 16px; box-shadow: var(--shadow); background: #fff;">
+                <div id="slider-inner" style="display: flex; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);">
+                    <!-- Dynamically loaded -->
+                </div>
             </div>
         </section>
 
-        <section id="categories-section" class="container">
-            <div id="homepage-categories-gallery" class="category-grid-gallery">
+        <section class="container" style="margin-top: 50px;">
+            <h2 class="section-title">Shop by Category</h2>
+            <div id="homepage-categories" class="category-grid">
                 <!-- Dynamically loaded -->
             </div>
             <div style="text-align: center; margin-top: 40px; margin-bottom: 60px;">
-                <a href="categories.html" class="btn" style="background: transparent; color: var(--premium-brown); border: 1px solid var(--premium-brown);">View All Categories</a>
+                <a href="categories.html" class="btn">View All Categories</a>
             </div>
         </section>
     </main>
@@ -422,34 +90,10 @@
             // Initial UI count
             cart.updateCountUI();
 
-            // Search Toggle Logic
-            const searchTrigger = document.getElementById('search-trigger');
-            const searchOverlay = document.getElementById('search-overlay');
-            const searchClose = document.getElementById('search-close');
-            const searchInput = document.getElementById('search-input');
-
-            searchTrigger.addEventListener('click', () => {
-                searchOverlay.style.display = 'flex';
-                searchInput.focus();
-            });
-
-            searchClose.addEventListener('click', () => {
-                searchOverlay.style.display = 'none';
-            });
-
-            // Close on Escape
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') searchOverlay.style.display = 'none';
-            });
-
             // --- Hot Products Slider Logic ---
-            const sliderSection = document.getElementById('hot-products-slider');
-            const sliderInner = document.getElementById('slider-inner');
-            const sliderDots = document.getElementById('slider-dots');
-            let currentSlide = 0;
-            let slideInterval;
-
             async function loadHotProducts() {
+                const sliderSection = document.getElementById('hot-products-slider');
+                const sliderInner = document.getElementById('slider-inner');
                 try {
                     const { data: hotProducts, error } = await supabaseClient
                         .from('products')
@@ -459,92 +103,65 @@
 
                     if (error) throw error;
 
-                    if (hotProducts && hotProducts.length > 0) {
-                        sliderSection.style.display = 'block';
-                        
-                        // Render Slides
-                        sliderInner.innerHTML = hotProducts.map(prod => `
-                            <div class="hot-slide" onclick="location.href='product.html?id=${prod.id}'">
-                                <div class="hot-card">
-                                    <div class="hot-badge">Hot Item</div>
-                                    <img src="${prod.image_url}" alt="${prod.name}" class="hot-img">
-                                    <div class="hot-info">
-                                        <h2 class="hot-name">${prod.name}</h2>
-                                        <p class="hot-price">$${prod.price}</p>
-                                        <p style="margin-top: 10px; font-size: 0.9rem; color: #888;">Limited edition handmade piece.</p>
+                        if (hotProducts && hotProducts.length > 0) {
+                            sliderSection.style.display = 'block';
+                            sliderInner.innerHTML = hotProducts.map(prod => `
+                                <div class="slide" onclick="location.href='product.html?id=${prod.id}'" style="min-width: 100%; position: relative; cursor: pointer;">
+                                    <img src="${prod.image_url}" style="width: 100%; height: 450px; object-fit: cover; display: block;">
+                                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 60px 30px 40px; color: white;">
+                                        <h3 style="font-size: 1.8rem; margin-bottom: 5px;">${prod.name}</h3>
+                                        <p style="font-weight: 700; color: #E7D8C9; font-size: 1.2rem;">$${prod.price}</p>
                                     </div>
                                 </div>
-                            </div>
-                        `).join('');
+                            `).join('');
 
-                        // Render Dots
-                        sliderDots.innerHTML = hotProducts.map((_, i) => `
-                            <div class="dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></div>
-                        `).join('');
+                            let currentSlide = 0;
+                            const totalSlides = hotProducts.length;
+                            
+                            const slideNext = () => {
+                                currentSlide = (currentSlide + 1) % totalSlides;
+                                sliderInner.style.transform = `translateX(-${currentSlide * 100}%)`;
+                            };
 
-                        startAutoSlide(hotProducts.length);
-                    }
+                            let autoSlide = setInterval(slideNext, 3000);
+
+                             // Pause on hover
+                             sliderSection.addEventListener('mouseenter', () => clearInterval(autoSlide));
+                             sliderSection.addEventListener('mouseleave', () => autoSlide = setInterval(slideNext, 3000));
+                        }
                 } catch (err) {
                     console.error("Error loading hot products:", err);
                 }
             }
 
-            window.goToSlide = (index) => {
-                const slides = document.querySelectorAll('.hot-slide');
-                if (index >= slides.length) index = 0;
-                if (index < 0) index = slides.length - 1;
-                
-                currentSlide = index;
-                sliderInner.style.transform = `translateX(-${currentSlide * 100}%)`;
-                
-                // Update dots
-                document.querySelectorAll('.dot').forEach((dot, i) => {
-                    dot.classList.toggle('active', i === currentSlide);
-                });
-
-                // Reset interval on manual click
-                clearInterval(slideInterval);
-                startAutoSlide(slides.length);
-            };
-
-            function startAutoSlide(count) {
-                slideInterval = setInterval(() => {
-                    goToSlide(currentSlide + 1);
-                }, 4000);
-            }
-
-            // Initial load
-            loadHotProducts();
-
             // --- Category Grid Logic ---
-            const container = document.getElementById('homepage-categories-gallery');
-            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px;">Loading collections...</div>';
+            async function loadCategories() {
+                const container = document.getElementById('homepage-categories');
+                showLoading('homepage-categories');
+                try {
+                    const { data: categories, error: catError } = await supabaseClient
+                        .from('categories')
+                        .select('*')
+                        .limit(8);
 
-            try {
-                // Fetch categories
-                const { data: categories, error: catError } = await supabaseClient
-                    .from('categories')
-                    .select('*')
-                    .limit(8); // Show more in the 2-column grid
+                    if (catError) throw catError;
 
-                if (catError) throw catError;
-
-                if (categories && categories.length > 0) {
-                    container.innerHTML = categories.map((cat, index) => `
-                        <div class="category-item-gallery" onclick="location.href='products.html?category=${encodeURIComponent(cat.name)}'">
-                            <div class="category-img-container">
-                                <img src="${cat.image || 'https://via.placeholder.com/600x800?text=' + encodeURIComponent(cat.name)}" alt="${cat.name}" class="category-img-gallery">
+                    if (categories && categories.length > 0) {
+                        container.innerHTML = categories.map(cat => `
+                            <div class="category-card" onclick="location.href='products.html?category=${encodeURIComponent(cat.name)}'">
+                                <div class="category-img-container">
+                                    <img src="${cat.image || 'https://via.placeholder.com/400x400'}" alt="${cat.name}" class="category-img">
+                                </div>
+                                <h3 class="category-name">${cat.name}</h3>
                             </div>
-                            <h3 class="category-name-gallery">${cat.name}</h3>
-                        </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No collections found.</p>';
+                        `).join('');
+                    }
+                } catch (e) {
+                    console.error("Error loading categories:", e);
                 }
-            } catch (e) {
-                console.error("Error loading categories:", e);
-                container.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">Error loading collections.</p>';
             }
+
+            await Promise.all([loadHotProducts(), loadCategories()]);
         });
     </script>
 </body>
