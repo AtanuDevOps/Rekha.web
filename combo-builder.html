@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Combo - Artsy Avenue</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .combo-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--white);
+            margin-bottom: 30px;
+            border-radius: 0 0 30px 30px;
+            box-shadow: var(--shadow);
+        }
+        .combo-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .combo-header p {
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .category-section {
+            margin-bottom: 50px;
+        }
+        .category-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-left: 10px;
+            border-left: 5px solid var(--accent-color);
+        }
+        .combo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .combo-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: var(--transition);
+            border: 2px solid transparent;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .combo-card.selected {
+            border-color: var(--accent-color);
+            background: #fff9f5;
+        }
+        .combo-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .combo-card-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+        }
+        .combo-card-info {
+            padding: 12px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .combo-card-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .combo-card-price {
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        .select-btn {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--accent-color);
+            background: transparent;
+            color: var(--accent-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+        .combo-card.selected .select-btn {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Floating Summary for Mobile */
+        .combo-summary-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--white);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 20px 20px 0 0;
+        }
+        .summary-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 2px;
+        }
+        .summary-info p {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        .view-summary-btn {
+            background: var(--accent-color);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Modal Summary */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: var(--bg-color);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 24px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .summary-list {
+            margin: 20px 0;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .summary-item-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .discount-row {
+            color: #27ae60;
+            font-weight: 700;
+        }
+        .total-row {
+            font-size: 1.3rem;
+            font-weight: 900;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--accent-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (min-width: 768px) {
+            .combo-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (min-width: 1024px) {
+            .combo-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Artsy Avenue</a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="categories.html">Categories</a></li>
+                    <li><a href="combo-builder.html" style="color: var(--accent-color); font-weight: 700;">Create Combo</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="cart.html" class="cart-icon">
+                        🛒 <span class="cart-count">0</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="combo-header">
+            <h1>Create Your Combo</h1>
+            <p>Select multiple products across any category to build your custom bundle. Get an <strong>automatic $5 discount</strong> on every combo!</p>
+        </div>
+
+        <div id="combo-container">
+            <!-- Categories and products will be loaded here -->
+        </div>
+    </main>
+
+    <!-- Floating Summary for Mobile -->
+    <div class="combo-summary-fixed" id="fixed-summary" style="display: none;">
+        <div class="summary-info">
+            <h4 id="selected-count-text">0 Items Selected</h4>
+            <p id="subtotal-text">Subtotal: $0.00</p>
+        </div>
+        <button class="view-summary-btn" onclick="showSummary()">View Combo</button>
+    </div>
+
+    <!-- Summary Modal -->
+    <div id="summary-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSummary()">&times;</span>
+            <h2 style="font-family: 'Playfair Display', serif;">Combo Summary</h2>
+            <div id="modal-summary-list" class="summary-list">
+                <!-- Selected items will appear here -->
+            </div>
+            <div class="summary-calculations">
+                <div class="summary-item">
+                    <span>Subtotal</span>
+                    <span id="modal-subtotal">$0.00</span>
+                </div>
+                <div class="summary-item discount-row">
+                    <span>Combo Discount</span>
+                    <span>-$5.00</span>
+                </div>
+                <div class="total-row">
+                    <span>Final Total</span>
+                    <span id="modal-total">$0.00</span>
+                </div>
+            </div>
+            <button class="btn" style="width: 100%; margin-top: 30px;" onclick="addComboToCart()">Add Combo to Cart</button>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        let allProducts = [];
+        let selectedProducts = [];
+        const DISCOUNT = 5.00;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            cart.updateCountUI();
+            await loadComboProducts();
+            
+            // Event Delegation for Product Selection
+            document.getElementById('combo-container').addEventListener('click', (e) => {
+                const card = e.target.closest('.combo-card');
+                if (card) {
+                    const productId = card.getAttribute('data-id');
+                    toggleProduct(productId);
+                }
+            });
+        });
+
+        async function loadComboProducts() {
+            const container = document.getElementById('combo-container');
+            showLoading('combo-container');
+
+            try {
+                // Fetch all categories
+                const { data: categories, error: catError } = await supabaseClient
+                    .from('categories')
+                    .select('*');
+
+                if (catError) throw catError;
+
+                // Fetch all products
+                const { data: products, error: prodError } = await supabaseClient
+                    .from('products')
+                    .select('*');
+
+                if (prodError) throw prodError;
+
+                allProducts = products;
+                container.innerHTML = '';
+
+                categories.forEach(category => {
+                    const catProducts = products.filter(p => p.category === category.name);
+                    
+                    if (catProducts.length > 0) {
+                        const section = document.createElement('section');
+                        section.className = 'category-section';
+                        section.innerHTML = `
+                            <h2 class="category-title">${category.name}</h2>
+                            <div class="combo-grid">
+                                ${catProducts.map(p => `
+                                    <div class="combo-card" data-id="${p.id}" id="product-${p.id}">
+                                        <img src="${p.image_url}" alt="${p.name}" class="combo-card-img">
+                                        <div class="combo-card-info">
+                                            <div class="combo-card-name">${p.name}</div>
+                                            <div class="combo-card-price">$${p.price}</div>
+                                            <button class="select-btn">Select</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                        container.appendChild(section);
+                    }
+                });
+
+            } catch (err) {
+                console.error("Error loading combo data:", err);
+                container.innerHTML = '<p>Error loading products. Please try again.</p>';
+            }
+        }
+
+        function toggleProduct(productId) {
+            const product = allProducts.find(p => p.id == productId);
+            if (!product) return;
+
+            const index = selectedProducts.findIndex(p => p.id == productId);
+            const card = document.getElementById(`product-${productId}`);
+            const btn = card.querySelector('.select-btn');
+
+            if (index === -1) {
+                selectedProducts.push(product);
+                card.classList.add('selected');
+                btn.innerText = 'Selected';
+            } else {
+                selectedProducts.splice(index, 1);
+                card.classList.remove('selected');
+                btn.innerText = 'Select';
+            }
+
+            updateSummaryUI();
+        }
+
+        function updateSummaryUI() {
+            const summaryFixed = document.getElementById('fixed-summary');
+            const countText = document.getElementById('selected-count-text');
+            const subtotalText = document.getElementById('subtotal-text');
+
+            if (selectedProducts.length > 0) {
+                summaryFixed.style.display = 'flex';
+                countText.innerText = `${selectedProducts.length} Item${selectedProducts.length > 1 ? 's' : ''} Selected`;
+                
+                const subtotal = selectedProducts.reduce((sum, p) => sum + p.price, 0);
+                subtotalText.innerText = `Subtotal: $${subtotal.toFixed(2)}`;
+            } else {
+                summaryFixed.style.display = 'none';
+            }
+        }
+
+        function showSummary() {
+            const modal = document.getElementById('summary-modal');
+            const list = document.getElementById('modal-summary-list');
+            const subtotalEl = document.getElementById('modal-subtotal');
+            const totalEl = document.getElementById('modal-total');
+
+            list.innerHTML = selectedProducts.map(p => `
+                <div class="summary-item">
+                    <span class="summary-item-name">${p.name}</span>
+                    <span>$${p.price.toFixed(2)}</span>
+                </div>
+            `).join('');
+
+            const subtotal = selectedProducts.reduce((sum, p) => sum + p.price, 0);
+            const total = Math.max(0, subtotal - DISCOUNT);
+
+            subtotalEl.innerText = `$${subtotal.toFixed(2)}`;
+            totalEl.innerText = `$${total.toFixed(2)}`;
+
+            modal.style.display = 'flex';
+        }
+
+        function closeSummary() {
+            document.getElementById('summary-modal').style.display = 'none';
+        }
+
+        function addComboToCart() {
+            if (selectedProducts.length < 2) {
+                alert("Please select at least 2 products to create a combo!");
+                return;
+            }
+
+            // Add all items to cart
+            selectedProducts.forEach(p => {
+                // Use the existing cart.add logic but suppress the alert for each item
+                const items = cart.get();
+                const existing = items.find(i => i.id === p.id);
+                if (existing) {
+                    existing.quantity += 1;
+                } else {
+                    items.push({ ...p, quantity: 1 });
+                }
+                localStorage.setItem('artsy_cart', JSON.stringify(items));
+            });
+
+            // Add the discount as a special item or apply it to the total
+            // For now, we'll add a "Combo Discount" item to the cart
+            const discountItem = {
+                id: 'combo-discount-' + Date.now(),
+                name: 'Combo Bundle Discount',
+                price: -DISCOUNT,
+                image_url: 'https://via.placeholder.com/100x100?text=Discount',
+                quantity: 1
+            };
+            
+            const items = cart.get();
+            items.push(discountItem);
+            localStorage.setItem('artsy_cart', JSON.stringify(items));
+
+            cart.updateCountUI();
+            alert("Combo added to cart successfully with a $5 discount!");
+            window.location.href = 'cart.html';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('summary-modal');
+            if (event.target == modal) {
+                closeSummary();
+            }
+        }
+    </script>
+</body>
+</html>
