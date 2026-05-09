@@ -3,7 +3,6 @@ let supabaseClient;
 
 function initSupabase() {
     if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL !== "YOUR_SUPABASE_URL") {
-        // The library exposes 'supabase' as the global object
         if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
@@ -37,7 +36,42 @@ initSupabase();
 
 // Cart Logic
 const cart = {
+    COMBO_DISCOUNT: 5.00,
+    
     get: () => JSON.parse(localStorage.getItem('artsy_cart')) || [],
+    
+    hasCombo: () => localStorage.getItem('artsy_cart_has_combo') === 'true',
+    
+    setHasCombo: (value) => {
+        if (value) {
+            localStorage.setItem('artsy_cart_has_combo', 'true');
+        } else {
+            localStorage.removeItem('artsy_cart_has_combo');
+        }
+    },
+    
+    subtotal: () => {
+        const items = cart.get();
+        // Filter out any old discount items that might still be present
+        const validItems = items.filter(item => !item.id?.startsWith?.('combo-discount-'));
+        return validItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    },
+    
+    discountAmount: () => {
+        if (!cart.hasCombo()) return 0;
+        
+        const comboProducts = cart.get().filter(item => item.isComboProduct && item.quantity > 0);
+        if (comboProducts.length < 2) {
+            cart.setHasCombo(false);
+            return 0;
+        }
+        return cart.COMBO_DISCOUNT;
+    },
+    
+    total: () => {
+        return Math.max(0, cart.subtotal() - cart.discountAmount());
+    },
+    
     add: (product, quantity = 1) => {
         const items = cart.get();
         const existing = items.find(i => i.id === product.id);
@@ -50,11 +84,20 @@ const cart = {
         cart.updateCountUI();
         alert(`${product.name} added to cart!`);
     },
+    
     remove: (productId) => {
         const items = cart.get().filter(i => i.id !== productId);
         localStorage.setItem('artsy_cart', JSON.stringify(items));
+        
+        // Check if we still have combo products after removal
+        const remainingComboProducts = items.filter(i => i.isComboProduct && i.quantity > 0);
+        if (remainingComboProducts.length < 2) {
+            cart.setHasCombo(false);
+        }
+        
         cart.updateCountUI();
     },
+    
     updateQuantity: (productId, quantity) => {
         const items = cart.get();
         const item = items.find(i => i.id === productId);
@@ -62,18 +105,28 @@ const cart = {
             item.quantity = parseInt(quantity);
             if (item.quantity <= 0) return cart.remove(productId);
             localStorage.setItem('artsy_cart', JSON.stringify(items));
+            
+            // Check combo validity
+            const comboProducts = items.filter(i => i.isComboProduct && i.quantity > 0);
+            if (comboProducts.length < 2) {
+                cart.setHasCombo(false);
+            }
+            
             cart.updateCountUI();
         }
     },
+    
     clear: () => {
         localStorage.removeItem('artsy_cart');
+        localStorage.removeItem('artsy_cart_has_combo');
         cart.updateCountUI();
     },
-    total: () => {
-        return cart.get().reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    },
+    
     updateCountUI: () => {
-        const count = cart.get().reduce((sum, item) => sum + item.quantity, 0);
+        const items = cart.get();
+        // Don't count discount items in the cart count
+        const validItems = items.filter(item => !item.id?.startsWith?.('combo-discount-'));
+        const count = validItems.reduce((sum, item) => sum + item.quantity, 0);
         const el = document.querySelector('.cart-count');
         if (el) el.textContent = count;
     }
@@ -211,7 +264,6 @@ function initSearch() {
 
         debounceTimer = setTimeout(async () => {
             try {
-                // Fetch products matching name or category
                 const { data: products, error } = await supabaseClient
                     .from('products')
                     .select('id, name, price, image_url, category')
@@ -246,6 +298,6 @@ function initSearch() {
             } catch (err) {
                 console.error("Search error:", err);
             }
-        }, 300); // 300ms debounce
+        }, 300);
     });
 }

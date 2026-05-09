@@ -33,11 +33,25 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
         }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+        .summary-row.discount {
+            color: #27ae60;
+            font-weight: 700;
+        }
         .total-price {
             font-size: 2rem;
             color: var(--accent-color);
             font-weight: 700;
-            margin: 15px 0;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--accent-color);
+            display: flex;
+            justify-content: space-between;
         }
         .remove-btn {
             background: none;
@@ -73,6 +87,7 @@
                     <li><a href="index.html">Home</a></li>
                     <li><a href="categories.html">Categories</a></li>
                     <li><a href="products.html">All Products</a></li>
+                    <li><a href="combo-builder.html" style="color: var(--accent-color); font-weight: 600;">Create Combo</a></li>
                 </ul>
                 <div class="search-container">
                     <input type="text" id="search-input" class="search-input" placeholder="Search art & crafts...">
@@ -96,7 +111,9 @@
 
         <div id="cart-summary-container" class="cart-summary" style="display: none;">
             <h3>Order Summary</h3>
-            <div class="total-price">Total: $<span id="cart-total">0.00</span></div>
+            <div id="summary-details">
+                <!-- Dynamic summary -->
+            </div>
             <button class="btn" onclick="checkout()">Proceed to Checkout</button>
         </div>
     </main>
@@ -136,11 +153,14 @@
 
         function renderCart() {
             const items = cart.get();
+            // Filter out any old discount items
+            const validItems = items.filter(item => !item.id?.startsWith?.('combo-discount-'));
+            
             const container = document.getElementById('cart-content');
             const summary = document.getElementById('cart-summary-container');
-            const totalEl = document.getElementById('cart-total');
+            const summaryDetails = document.getElementById('summary-details');
 
-            if (items.length === 0) {
+            if (validItems.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; margin: 60px 0;">
                         <h2>Your cart is empty</h2>
@@ -168,7 +188,7 @@
                     <tbody>
             `;
 
-            items.forEach(item => {
+            validItems.forEach(item => {
                 tableHtml += `
                     <tr>
                         <td><img src="${item.image_url || 'https://via.placeholder.com/80x80?text=Product'}" class="cart-item-img"></td>
@@ -189,7 +209,36 @@
 
             tableHtml += `</tbody></table>`;
             container.innerHTML = tableHtml;
-            totalEl.textContent = cart.total().toFixed(2);
+
+            // Build summary details
+            const subtotal = cart.subtotal();
+            const discount = cart.discountAmount();
+            const finalTotal = cart.total();
+
+            let summaryHtml = `
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>$${subtotal.toFixed(2)}</span>
+                </div>
+            `;
+
+            if (discount > 0) {
+                summaryHtml += `
+                    <div class="summary-row discount">
+                        <span>Combo Discount</span>
+                        <span>-$${discount.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+
+            summaryHtml += `
+                <div class="total-price">
+                    <span>Final Total</span>
+                    <span>$${finalTotal.toFixed(2)}</span>
+                </div>
+            `;
+
+            summaryDetails.innerHTML = summaryHtml;
         }
 
         function updateQty(id, qty) {
@@ -203,9 +252,7 @@
         }
 
         function checkout() {
-            alert("Thank you for your order! Checkout functionality is part of Phase 2.");
-            cart.clear();
-            renderCart();
+            alert('Thank you for your order! (Checkout would proceed here in production)');
         }
     </script>
 </body>
